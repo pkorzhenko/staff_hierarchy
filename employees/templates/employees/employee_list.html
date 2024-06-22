@@ -15,24 +15,15 @@
         <div class="form-group">
             <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
         </div>
-        <div class="form-group">
-            <select name="sort_by" class="form-control">
-                <option value="name" {% if request.GET.sort_by == 'name' %}selected{% endif %}>Name</option>
-                <option value="position" {% if request.GET.sort_by == 'position' %}selected{% endif %}>Position</option>
-                <option value="hire_date" {% if request.GET.sort_by == 'hire_date' %}selected{% endif %}>Hire Date
-                </option>
-                <option value="email" {% if request.GET.sort_by == 'email' %}selected{% endif %}>Email</option>
-            </select>
-        </div>
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
     <table class="table table-striped mt-3">
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Hire Date</th>
-            <th>Email</th>
+            <th><a href="?{% if q is not '' %}q={{ q }}{% endif %}&sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">Name</a></th>
+            <th><a href="?{% if q is not '' %}q={{ q }}{% endif %}&sort_by=position&order={% if sort_by == 'position' and order == 'asc' %}desc{% else %}asc{% endif %}">Position</a></th>
+            <th><a href="?{% if q is not '' %}q={{ q }}{% endif %}&sort_by=hire_date&order={% if sort_by == 'hire_date' and order == 'asc' %}desc{% else %}asc{% endif %}">Hire Date</a></th>
+            <th><a href="?{% if q is not '' %}q={{ q }}{% endif %}&sort_by=email&order={% if sort_by == 'email' and order == 'asc' %}desc{% else %}asc{% endif %}">Email</a></th>
             <th>Actions</th>
         </tr>
         </thead>

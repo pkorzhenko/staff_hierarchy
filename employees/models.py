@@ -11,6 +11,14 @@ class Employee(models.Model):
   def __str__(self):
     return f"{self.name} {self.position}"
 
+  # change manager
+  def save(self, *args, **kwargs):
+    if self.pk:
+      old_manager = Employee.objects.get(pk=self.pk).manager
+      if old_manager != self.manager:
+        self.subordinates.update(manager=self.manager)
+    super().save(*args, **kwargs)
+
   class Meta:
     indexes = [
       models.Index(fields=['name']),

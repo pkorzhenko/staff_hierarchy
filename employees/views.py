@@ -42,6 +42,7 @@ def user_logout(request):
 def employee_list(request):
   query = request.GET.get('q')
   sort_by = request.GET.get('sort_by', 'name')
+  order = request.GET.get('order', 'asc')
   employees = Employee.objects.all()
 
   if query:
@@ -50,6 +51,10 @@ def employee_list(request):
       Q(position__icontains=query) |
       Q(email__icontains=query)
     )
+
+  if order == 'desc':
+    sort_by = '-' + sort_by
+
   employees = employees.order_by(sort_by)
   paginator = Paginator(employees, 20)
 
@@ -62,7 +67,14 @@ def employee_list(request):
       'has_next': page_obj.has_next()
     })
 
-  return render(request, 'employees/employee_list.html', {'page_obj': page_obj})
+  return render(request, 'employees/employee_list.html',
+                {
+                  'page_obj': page_obj,
+                  'sort_by': sort_by,
+                  'order': order,
+                  'q': query
+                 }
+                )
 
 
 @login_required
