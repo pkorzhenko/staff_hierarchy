@@ -1,0 +1,63 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Employee List</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Employee List</h1>
+            <form method="get" action="">
+                <div class="form-group">
+                    <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
+                </div>
+                <div class="form-group">
+                    <select name="sort_by" class="form-control">
+                        <option value="name" {% if request.GET.sort_by == 'name' %}selected{% endif %}>Name</option>
+                        <option value="position" {% if request.GET.sort_by == 'position' %}selected{% endif %}>Position</option>
+                        <option value="hire_date" {% if request.GET.sort_by == 'hire_date' %}selected{% endif %}>Hire Date</option>
+                        <option value="email" {% if request.GET.sort_by == 'email' %}selected{% endif %}>Email</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Hire Date</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.name }}</td>
+                            <td>{{ employee.position }}</td>
+                            <td>{{ employee.hire_date }}</td>
+                            <td>{{ employee.email }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('form').on('submit', function(event) {
+                    event.preventDefault();
+                    $.ajax({
+                        url: '',
+                        data: $(this).serialize(),
+                        success: function(data) {
+                            $('body').html(data);
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+    </html>
