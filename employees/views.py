@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 from employees.models import Employee
 
@@ -14,7 +16,24 @@ def load_subordinates(request, employee_id):
   subordinates = employee.subordinates.all()
   return render(request, 'employees/subordinates.html', {'subordinates': subordinates})
 
+def user_login(request):
+      if request.method == 'POST':
+          username = request.POST['username']
+          password = request.POST['password']
+          user = authenticate(request, username=username, password=password)
+          if user is not None:
+              login(request, user)
+              return redirect('employee_list')
+          else:
+              return render(request, 'employees/login.html', {'error': 'Invalid credentials'})
+      return render(request, 'employees/login.html')
 
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+
+@login_required
 def employee_list(request):
   query = request.GET.get('q')
   sort_by = request.GET.get('sort_by', 'name')

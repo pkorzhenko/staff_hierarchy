@@ -9,4 +9,15 @@ class Employee(models.Model):
   manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinates')
 
   def __str__(self):
-    return self.name
+    return f"{self.name} {self.position}"
+
+  class Meta:
+    indexes = [
+      models.Index(fields=['name']),
+      models.Index(fields=['position']),
+      models.Index(fields=['email']),
+      models.Index(fields=['hire_date']),
+      models.Index(fields=['manager'])
+    ]
+    verbose_name = "Employee"
+    verbose_name_plural = "Employees"

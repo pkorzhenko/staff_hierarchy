@@ -2,17 +2,27 @@
 
 # setup
 
-- pip install -r requirements.txt
-- copy .env.example to .env
-- edit .env to your enviroment
+```bash
+pip install -r requirements.txt
+```
 
 # seed fake data
 
-- python manage.py seed
+```bash
+python manage.py seed
+```
+
+# create superuser
+
+```bash
+python manage.py createsuperuser
+```
 
 # run
 
-- python manage.py runserver
+```bash
+python manage.py runserver
+```
 
 # test
 
