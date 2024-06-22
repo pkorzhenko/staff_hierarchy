@@ -1,0 +1,51 @@
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Employee Hierarchy</title>
+       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+       <style>
+           ul {
+               list-style-type: none;
+           }
+           li {
+               margin-left: 20px;
+           }
+       </style>
+   </head>
+   <body>
+       <div class="container">
+           <h1>Employee Hierarchy</h1>
+           <ul>
+               {% for employee in employees %}
+                   <li>
+                       {{ employee.name }} - {{ employee.position }}
+                       <button class="btn btn-link load-subordinates" data-id="{{ employee.id }}">Load Subordinates</button>
+                       <div class="subordinates" id="subordinates-{{ employee.id }}"></div>
+                   </li>
+               {% endfor %}
+           </ul>
+       </div>
+       <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+       <script>
+           $(document).ready(function() {
+               $('.load-subordinates').click(function() {
+                   var employeeId = $(this).data('id');
+                   var subordinatesDiv = $('#subordinates-' + employeeId);
+                   if (subordinatesDiv.is(':empty')) {
+                       $.ajax({
+                           url: '/employees/load_subordinates/' + employeeId + '/',
+                           method: 'GET',
+                           success: function(data) {
+                               subordinatesDiv.html(data);
+                           }
+                       });
+                   } else {
+                       subordinatesDiv.toggle();
+                   }
+               });
+           });
+       </script>
+   </body>
+   </html>
