@@ -81,9 +81,6 @@ $(document).ready(function () {
             out: function(event, ui) {
                 $(this).removeClass('highlight');
             },
-            success: function(event, ui) {
-                $(this).removeClass('highlight');
-            },
             drop: function (event, ui) {
                 var employeeId = ui.draggable.data('id');
                 var newManagerId = $(this).data('id');
@@ -101,7 +98,12 @@ $(document).ready(function () {
                     success: function (data) {
                       var draggedElement = ui.draggable.detach();
                       var newListItem = $('<li></li>').append(draggedElement);
-                      $('#subordinates-' + newManagerId + ' > ul').append(newListItem);
+                      var subordinatesUl = $('#subordinates-' + newManagerId + ' > ul');
+                      if (subordinatesUl.length === 0) {
+                            subordinatesUl = $('<ul></ul>');
+                            $('#subordinates-' + newManagerId).append(subordinatesUl);
+                      }
+                      subordinatesUl.append(newListItem);
                     }
                 });
             }
