@@ -9,60 +9,122 @@
         ul {
             list-style-type: none;
         }
+
         li {
             margin-left: 20px;
         }
+        .highlight {
+            background-color: #ffff99;
+        }
     </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Employee Hierarchy</h1>
-        {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
-            <a href="{% url 'employee_list' %}" class="btn btn-info">Employee List</a>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-        {% endif %}
-        <ul>
-            {% for employee in employees %}
-                <li>
-                    <button class="btn btn-link load-subordinates" data-id="{{ employee.id }}">{{ employee.name }} - {{ employee.position }}</button>
-                    <div class="subordinates" id="subordinates-{{ employee.id }}"></div>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            function loadSubordinates() {
-                var employeeId = $(this).data('id');
-                var subordinatesDiv = $('#subordinates-' + employeeId);
-                if (subordinatesDiv.is(':empty')) {
-                    $.ajax({
-                        url: '/employees/load_subordinates/' + employeeId + '/',
-                        method: 'GET',
-                        success: function(data) {
-                            var subordinatesHtml = '<ul>';
-                            data.forEach(function(subordinate) {
-                                subordinatesHtml += '<li>';
-                                subordinatesHtml += '<button class="btn btn-link load-subordinates" data-id="' + subordinate.id + '">' + subordinate.name + ' - ' + subordinate.position + '</button>';
-                                subordinatesHtml += '<div class="subordinates" id="subordinates-' + subordinate.id + '"></div>';
-                                subordinatesHtml += '</li>';
-                            });
-                            subordinatesHtml += '</ul>';
-                            subordinatesDiv.html(subordinatesHtml);
-                            // Attach click event to newly added buttons
-                            subordinatesDiv.find('.load-subordinates').click(loadSubordinates);
-                        }
-                    });
-                } else {
-                    subordinatesDiv.toggle();
+<div class="container">
+    <h1>Employee Hierarchy</h1>
+    {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+        <a href="{% url 'employee_list' %}" class="btn btn-info">Employee List</a>
+    {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+    {% endif %}
+    <ul>
+        {% for employee in employees %}
+            <li>
+                <div class="btn btn-link load-subordinates" data-id="{{ employee.id }}">{{ employee.name }} - {{ employee.position }}</div>
+                <div class="subordinates" id="subordinates-{{ employee.id }}" data-id="{{ employee.id }}">
+                    <ul>
+                        {% for subordinate in employee.subordinates_list %}
+                            <li>
+                                <div class="btn btn-link load-subordinates" data-id="{{ subordinate.id }}">{{ subordinate.name }} - {{ subordinate.position }}</div>
+                                <div class="subordinates" id="subordinates-{{ subordinate.id }}" data-id="{{ subordinate.id }}"></div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+<script>
+$(document).ready(function () {
+    function loadSubordinates() {
+        var employeeId = $(this).data('id');
+        var subordinatesDiv = $('#subordinates-' + employeeId);
+        if (subordinatesDiv.is(':empty')) {
+            $.ajax({
+                url: '/employees/load_subordinates/' + employeeId + '/',
+                method: 'GET',
+                success: function (data) {
+                    subordinatesDiv.html(data);
+                    subordinatesDiv.find('.load-subordinates').click(loadSubordinates);
+                    makeDraggableAndDroppable();
+                }
+            });
+        } else {
+            subordinatesDiv.toggle();
+        }
+    }
+
+    function makeDraggableAndDroppable() {
+        $('.load-subordinates').draggable({
+            revert: "invalid",
+            helper: "clone"
+        });
+
+        $('.load-subordinates').droppable({
+            greedy: true,
+            over: function(event, ui) {
+                $(this).addClass('highlight');
+            },
+            out: function(event, ui) {
+                $(this).removeClass('highlight');
+            },
+            success: function(event, ui) {
+                $(this).removeClass('highlight');
+            },
+            drop: function (event, ui) {
+                var employeeId = ui.draggable.data('id');
+                var newManagerId = $(this).data('id');
+                $(this).removeClass('highlight');
+                $.ajax({
+                    url: '/employees/change_manager/',
+                    method: 'POST',
+                    data: {
+                        'employee_id': employeeId,
+                        'new_manager_id': newManagerId
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                    },
+                    success: function (data) {
+                      var draggedElement = ui.draggable.detach();
+                      var newListItem = $('<li></li>').append(draggedElement);
+                      $('#subordinates-' + newManagerId + ' > ul').append(newListItem);
+                    }
+                });
+            }
+        });
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-
-            $('.load-subordinates').click(loadSubordinates);
-        });
-    </script>
+        }
+        return cookieValue;
+    }
+    $('.load-subordinates').click(loadSubordinates);
+    makeDraggableAndDroppable();
+});
+</script>
 </body>
 </html>

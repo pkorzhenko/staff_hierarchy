@@ -1,7 +1,7 @@
 <ul>
    {% for subordinate in subordinates %}
        <li>
-           <button class="btn btn-link load-subordinates" data-id="{{ subordinate.id }}">{{ subordinate.name }} - {{ subordinate.position }}</button>
+           <div class="btn btn-link load-subordinates" data-id="{{ subordinate.id }}">{{ subordinate.name }} - {{ subordinate.position }}</div>
            <div class="subordinates" id="subordinates-{{ subordinate.id }}"></div>
        </li>
    {% endfor %}

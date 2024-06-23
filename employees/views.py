@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.views.decorators.csrf import csrf_exempt
 
 from employees.models import Employee
 from employees.forms import EmployeeForm
@@ -11,6 +12,8 @@ from employees.forms import EmployeeForm
 
 def employee_hierarchy(request):
   top_level_employees = Employee.objects.filter(manager__isnull=True)
+  for employee in top_level_employees:
+    employee.subordinates_list = employee.subordinates.all()
   return render(request, 'employees/hierarchy.html', {'employees': top_level_employees})
 
 
@@ -21,21 +24,21 @@ def load_subordinates(request, employee_id):
 
 
 def user_login(request):
-      if request.method == 'POST':
-          username = request.POST['username']
-          password = request.POST['password']
-          user = authenticate(request, username=username, password=password)
-          if user is not None:
-              login(request, user)
-              return redirect('employee_list')
-          else:
-              return render(request, 'employees/login.html', {'error': 'Invalid credentials'})
-      return render(request, 'employees/login.html')
+  if request.method == 'POST':
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+      login(request, user)
+      return redirect('employee_list')
+    else:
+      return render(request, 'employees/login.html', {'error': 'Invalid credentials'})
+  return render(request, 'employees/login.html')
 
 
 def user_logout(request):
-    logout(request)
-    return redirect('login')
+  logout(request)
+  return redirect('login')
 
 
 @login_required
@@ -73,7 +76,7 @@ def employee_list(request):
                   'sort_by': sort_by,
                   'order': order,
                   'q': query
-                 }
+                }
                 )
 
 
@@ -119,3 +122,19 @@ def search_managers(request):
       names.append(employee.name)
     return JsonResponse(names, safe=False)
   return JsonResponse([], safe=False)
+
+
+@csrf_exempt
+def change_manager(request):
+  if request.method == 'POST':
+    employee_id = request.POST.get('employee_id')
+    new_manager_id = request.POST.get('new_manager_id')
+
+    print(employee_id, new_manager_id)
+    employee = Employee.objects.get(id=employee_id)
+    new_manager = Employee.objects.get(id=new_manager_id)
+
+    employee.manager = new_manager
+    employee.save()
+
+    return JsonResponse({'status': 'success'})

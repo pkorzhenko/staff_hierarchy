@@ -8,7 +8,8 @@ from employees.views import (
   employee_create,
   employee_update,
   employee_delete,
-  search_managers
+  search_managers,
+  change_manager
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
   path('update/<int:pk>/', employee_update, name='employee_update'),
   path('delete/<int:pk>/', employee_delete, name='employee_delete'),
   path('search_managers/', search_managers, name='search_managers'),
+  path('change_manager/', change_manager, name='change_manager'),
 ]

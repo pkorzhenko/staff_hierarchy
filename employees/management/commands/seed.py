@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     # Create employees under each manager
     for manager in managers:
-      for _ in range(5000):
+      for _ in range(25):
         name = fake.name()
         hire_date = fake.date_this_decade()
         email = fake.email()
