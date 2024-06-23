@@ -35,7 +35,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('.load-subordinates').click(function() {
+            function loadSubordinates() {
                 var employeeId = $(this).data('id');
                 var subordinatesDiv = $('#subordinates-' + employeeId);
                 if (subordinatesDiv.is(':empty')) {
@@ -43,13 +43,25 @@
                         url: '/employees/load_subordinates/' + employeeId + '/',
                         method: 'GET',
                         success: function(data) {
-                            subordinatesDiv.html(data);
+                            var subordinatesHtml = '<ul>';
+                            data.forEach(function(subordinate) {
+                                subordinatesHtml += '<li>';
+                                subordinatesHtml += '<button class="btn btn-link load-subordinates" data-id="' + subordinate.id + '">' + subordinate.name + ' - ' + subordinate.position + '</button>';
+                                subordinatesHtml += '<div class="subordinates" id="subordinates-' + subordinate.id + '"></div>';
+                                subordinatesHtml += '</li>';
+                            });
+                            subordinatesHtml += '</ul>';
+                            subordinatesDiv.html(subordinatesHtml);
+                            // Attach click event to newly added buttons
+                            subordinatesDiv.find('.load-subordinates').click(loadSubordinates);
                         }
                     });
                 } else {
                     subordinatesDiv.toggle();
                 }
-            });
+            }
+
+            $('.load-subordinates').click(loadSubordinates);
         });
     </script>
 </body>
