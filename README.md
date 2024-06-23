@@ -4,6 +4,7 @@
 
 ```bash
 pip install -r requirements.txt
+python manage.py migrate
 ```
 
 # seed fake data
@@ -23,7 +24,3 @@ python manage.py createsuperuser
 ```bash
 python manage.py runserver
 ```
-
-# test
-
-- http://localhost:8088/
